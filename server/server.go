@@ -878,11 +878,23 @@ func (s *Server) startGoRoutine(f func()) {
 func (s *Server) getClientConnectURLs() []string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	var (
+		host string
+		port int
+	)
 
-	sPort := strconv.Itoa(s.opts.Port)
+	if s.opts.Cluster.AdvertiseStr != "" {
+		host = s.opts.Cluster.Host
+		port = s.opts.Cluster.Port
+	} else {
+		host = s.opts.Host
+		port = s.opts.Port
+	}
+
+	sPort := strconv.Itoa(port)
 	urls := make([]string, 0, 1)
 
-	ipAddr, err := net.ResolveIPAddr("ip", s.opts.Host)
+	ipAddr, err := net.ResolveIPAddr("ip", host)
 	// If the host is "any" (0.0.0.0 or ::), get specific IPs from available
 	// interfaces.
 	if err == nil && ipAddr.IP.IsUnspecified() {
