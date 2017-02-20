@@ -588,13 +588,25 @@ func (s *Server) broadcastUnSubscribe(sub *subscription) {
 }
 
 func (s *Server) routeAcceptLoop(ch chan struct{}) {
-	hp := net.JoinHostPort(s.opts.Cluster.Host, strconv.Itoa(s.opts.Cluster.Port))
+	var (
+		h string
+		p int
+	)
+
+	if s.opts.Cluster.Listen != "" {
+		h = s.opts.Cluster.Listen
+		p = s.opts.Cluster.ListenPort
+	} else {
+		h = s.opts.Cluster.Host
+		p = s.opts.Cluster.Port
+	}
+	hp := net.JoinHostPort(h, strconv.Itoa(p))
 	Noticef("Listening for route connections on %s", hp)
 	l, e := net.Listen("tcp", hp)
 	if e != nil {
 		// We need to close this channel to avoid a deadlock
 		close(ch)
-		Fatalf("Error listening on router port: %d - %v", s.opts.Cluster.Port, e)
+		Fatalf("Error listening on router port: %d - %v", p, e)
 		return
 	}
 

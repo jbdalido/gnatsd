@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/nats-io/gnatsd/auth"
 	"github.com/nats-io/gnatsd/logger"
@@ -108,7 +109,7 @@ func main() {
 	flag.BoolVar(&showVersion, "v", false, "Print version information.")
 	flag.IntVar(&opts.ProfPort, "profile", 0, "Profiling HTTP port")
 	flag.StringVar(&opts.RoutesStr, "routes", "", "Routes to actively solicit a connection.")
-	flag.StringVar(&opts.Cluster.ListenStr, "cluster", "", "Cluster url from which members can solicit routes.")
+	flag.StringVar(&opts.Cluster.AdvertiseStr, "cluster", "", "Cluster url from which members can solicit routes.")
 	flag.StringVar(&opts.Cluster.ListenStr, "cluster_listen", "", "Cluster url from which members can solicit routes.")
 	flag.BoolVar(&opts.Cluster.NoAdvertise, "no_advertise", false, "Advertise known cluster IPs to clients.")
 	flag.IntVar(&opts.Cluster.ConnectRetries, "connect_retries", 0, "For implicit routes, number of connect retries")
@@ -269,7 +270,7 @@ func configureClusterOpts(opts *server.Options) error {
 	// If we don't have cluster defined in the configuration
 	// file and no cluster listen string override, but we do
 	// have a routes override, we need to report misconfiguration.
-	if opts.Cluster.ListenStr == "" && opts.Cluster.Host == "" &&
+	if opts.Cluster.AdvertiseStr == "" && opts.Cluster.Host == "" &&
 		opts.Cluster.Port == 0 {
 		if opts.RoutesStr != "" {
 			server.PrintAndDie("Solicited routes require cluster capabilities, e.g. --cluster.")
@@ -278,8 +279,8 @@ func configureClusterOpts(opts *server.Options) error {
 	}
 
 	// If cluster flag override, process it
-	if opts.Cluster.ListenStr != "" {
-		clusterURL, err := url.Parse(opts.Cluster.ListenStr)
+	if opts.Cluster.AdvertiseStr != "" {
+		clusterURL, err := url.Parse(opts.Cluster.AdvertiseStr)
 		if err != nil {
 			return err
 		}
@@ -291,6 +292,28 @@ func configureClusterOpts(opts *server.Options) error {
 		_, err = fmt.Sscan(p, &opts.Cluster.Port)
 		if err != nil {
 			return err
+		}
+
+		if opts.Cluster.ListenStr != "" {
+			advertiseURL, err := url.Parse(opts.Cluster.ListenStr)
+			if err != nil {
+				return err
+			}
+			ah, ap, err := net.SplitHostPort(advertiseURL.Host)
+			if err != nil {
+				return err
+			}
+			opts.Cluster.Host = ah
+			_, err = fmt.Sscan(ap, &opts.Cluster.Port)
+			if err != nil {
+				return err
+			}
+			opts.Cluster.Listen = h
+			lp, err := strconv.Atoi(ap)
+			if err != nil {
+				return err
+			}
+			opts.Cluster.ListenPort = lp
 		}
 
 		if clusterURL.User != nil {

@@ -35,12 +35,15 @@ type Permissions struct {
 type ClusterOpts struct {
 	Host           string      `json:"addr"`
 	Port           int         `json:"cluster_port"`
+	Listen         string      `json:"listen"`
+	ListenPort     int         `json:"listen_port"`
 	Username       string      `json:"-"`
 	Password       string      `json:"-"`
 	AuthTimeout    float64     `json:"auth_timeout"`
 	TLSTimeout     float64     `json:"-"`
 	TLSConfig      *tls.Config `json:"-"`
 	ListenStr      string      `json:"-"`
+	AdvertiseStr   string      `json:"-"`
 	NoAdvertise    bool        `json:"-"`
 	ConnectRetries int         `json:"-"`
 }
