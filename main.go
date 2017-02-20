@@ -270,13 +270,6 @@ func configureClusterOpts(opts *server.Options) error {
 	// If we don't have cluster defined in the configuration
 	// file and no cluster listen string override, but we do
 	// have a routes override, we need to report misconfiguration.
-	if opts.Cluster.AdvertiseStr == "" && opts.Cluster.Host == "" &&
-		opts.Cluster.Port == 0 {
-		if opts.RoutesStr != "" {
-			server.PrintAndDie("Solicited routes require cluster capabilities, e.g. --cluster.")
-		}
-		return nil
-	}
 
 	// If cluster flag override, process it
 	if opts.Cluster.AdvertiseStr != "" {

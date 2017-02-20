@@ -898,7 +898,10 @@ func (s *Server) getClientConnectURLs() []string {
 	// If the host is "any" (0.0.0.0 or ::), get specific IPs from available
 	// interfaces.
 	if err == nil && ipAddr.IP.IsUnspecified() {
-		Debugf("WE ARE FUKED MY DEAR MOFO ! %s", s.opts.Host)
+		Debugf("WE ARE FUKED MY DEAR MOFO ! %s", s.opts.Cluster)
+		Debugf("Err %s", err)
+		Debugf("Err %s", ipAddr)
+
 		var ip net.IP
 		ifaces, _ := net.Interfaces()
 		for _, i := range ifaces {
