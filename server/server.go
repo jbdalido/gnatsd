@@ -919,5 +919,6 @@ func (s *Server) getClientConnectURLs() []string {
 			urls = append(urls, net.JoinHostPort(s.opts.Host, sPort))
 		}
 	}
+	Debugf("URLS %s", urls)
 	return urls
 }
