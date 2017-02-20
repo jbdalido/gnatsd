@@ -674,6 +674,7 @@ func (s *Server) StartRouting(clientListenReady chan struct{}) {
 		MaxPayload:        s.info.MaxPayload,
 		ClientConnectURLs: clientConnectURLs,
 	}
+	Debugf("INFOS %s", info)
 	// Check for Auth items
 	if s.opts.Cluster.Username != "" {
 		info.AuthRequired = true
